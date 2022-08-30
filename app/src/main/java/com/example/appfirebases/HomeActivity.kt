@@ -1,5 +1,6 @@
 package com.example.appfirebases
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.appfirebases.databinding.ActivityHomeBinding
@@ -18,11 +19,18 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Setup
         val bundle = intent.extras
-        val email = bundle?.getString("email").toString()
+        val email = bundle?.getString("email")
         val provider = bundle?.getString("provider")
+        setup(email ?: "", provider ?: "")
 
-        setup(email,provider.toString())
+        // Data persistence
+        val prefs = getSharedPreferences(getString(R.string.prefs_file), Context.MODE_PRIVATE).edit()
+        prefs.putString("email",email)
+        prefs.putString("provider",provider)
+        prefs.apply()
+
 
     }
 
@@ -33,6 +41,12 @@ class HomeActivity : AppCompatActivity() {
         binding.tvProvider.text = provider
 
         binding.btnCloseSession.setOnClickListener {
+
+            //Erase data of Log in
+            val prefs = getSharedPreferences(getString(R.string.prefs_file), Context.MODE_PRIVATE).edit()
+            prefs.clear()
+            prefs.apply()
+
             FirebaseAuth.getInstance().signOut()
             onBackPressed()
         }
